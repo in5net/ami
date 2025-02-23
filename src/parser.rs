@@ -1,4 +1,4 @@
-use crate::{Node, Token};
+use crate::{BinaryOp, Node, Token};
 use std::vec::IntoIter;
 use Token::*;
 
@@ -67,7 +67,23 @@ impl Parser {
     }
 
     fn expr(&mut self) -> Node {
-        self.atom()
+        self.arith_expr()
+    }
+
+    fn arith_expr(&mut self) -> Node {
+        let result = self.atom();
+
+        match self.token {
+            Plus => {
+                self.advance();
+                Node::Binary(Box::new(result), BinaryOp::Add, Box::new(self.arith_expr()))
+            }
+            Minus => {
+                self.advance();
+                Node::Binary(Box::new(result), BinaryOp::Sub, Box::new(self.arith_expr()))
+            }
+            _ => result,
+        }
     }
 
     fn atom(&mut self) -> Node {

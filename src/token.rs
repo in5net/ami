@@ -3,6 +3,8 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Number(String),
+    Plus,
+    Minus,
     Newline,
     EOF,
 }
@@ -10,9 +12,11 @@ pub enum Token {
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Token::Number(value) => write!(f, "{}", value),
-            Token::Newline => write!(f, "'\\n'"),
-            Token::EOF => write!(f, "<eof>"),
+            Self::Number(value) => write!(f, "{}", value),
+            Self::Plus => write!(f, "'+'"),
+            Self::Minus => write!(f, "'-'"),
+            Self::Newline => write!(f, "'\\n'"),
+            Self::EOF => write!(f, "<eof>"),
         }
     }
 }

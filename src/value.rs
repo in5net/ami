@@ -8,7 +8,7 @@ pub enum Value {
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Value::Number(value) => write!(f, "{}", value),
+            Self::Number(value) => write!(f, "{}", value),
         }
     }
 }

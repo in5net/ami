@@ -40,6 +40,14 @@ impl Lexer {
 
         match self.current_char {
             '0'..='9' => self.number(),
+            '+' => {
+                self.advance();
+                Plus
+            }
+            '-' => {
+                self.advance();
+                Minus
+            }
             '\n' => {
                 self.advance();
                 Newline

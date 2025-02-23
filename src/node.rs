@@ -1,8 +1,30 @@
 use std::fmt;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum UnaryOp {
+    Pos,
+    Neg,
+}
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum BinaryOp {
+    Add,
+    Sub,
+}
+
+impl fmt::Display for BinaryOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Add => write!(f, "+"),
+            Self::Sub => write!(f, "-"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Node {
     Number(String),
+    Unary(UnaryOp, Box<Node>),
+    Binary(Box<Node>, BinaryOp, Box<Node>),
     Statements(Vec<Node>),
     EOF,
 }
@@ -10,8 +32,13 @@ pub enum Node {
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Node::Number(x) => write!(f, "{}", x),
-            Node::Statements(nodes) => write!(
+            Self::Number(x) => write!(f, "{}", x),
+            Self::Unary(op, node) => match op {
+                UnaryOp::Pos => write!(f, "(+{})", node),
+                UnaryOp::Neg => write!(f, "(-{})", node),
+            },
+            Self::Binary(left, op, right) => write!(f, "({} {} {})", left, op, right),
+            Self::Statements(nodes) => write!(
                 f,
                 "{{\n  {}\n}}",
                 nodes
@@ -20,7 +47,7 @@ impl fmt::Display for Node {
                     .collect::<Vec<String>>()
                     .join("\n  ")
             ),
-            Node::EOF => write!(f, "<eof>"),
+            Self::EOF => write!(f, "<eof>"),
         }
     }
 }
