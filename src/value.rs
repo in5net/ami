@@ -6,6 +6,19 @@ use crate::Node;
 pub enum Value {
     Number(f64),
     Function(Rc<str>, Vec<Rc<str>>, Box<Node>),
+    NativeFunction(fn(&Vec<Value>) -> Value),
+}
+
+impl From<i32> for Value {
+    fn from(value: i32) -> Self {
+        Self::Number(value as f64)
+    }
+}
+
+impl From<f64> for Value {
+    fn from(value: f64) -> Self {
+        Self::Number(value)
+    }
 }
 
 impl fmt::Display for Value {
@@ -13,6 +26,7 @@ impl fmt::Display for Value {
         match self {
             Self::Number(value) => write!(f, "{}", value),
             Self::Function(name, _, _) => write!(f, "<fn {}>", name),
+            Self::NativeFunction(_) => write!(f, "<native fn>"),
         }
     }
 }
