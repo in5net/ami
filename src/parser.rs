@@ -97,7 +97,7 @@ impl Parser {
 
     fn arith_expr(&mut self) -> ParseResult {
         let start = self.token.range.start;
-        let left = self.atom()?;
+        let left = self.term()?;
 
         match self.token.ty {
             Plus => {
@@ -113,6 +113,31 @@ impl Parser {
                 let right = self.arith_expr()?;
                 self.node(
                     NodeType::Binary(Box::new(left), BinaryOp::Sub, Box::new(right)),
+                    start,
+                )
+            }
+            _ => Ok(left),
+        }
+    }
+
+    fn term(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+        let left = self.atom()?;
+
+        match self.token.ty {
+            Star => {
+                self.advance();
+                let right = self.term()?;
+                self.node(
+                    NodeType::Binary(Box::new(left), BinaryOp::Mul, Box::new(right)),
+                    start,
+                )
+            }
+            Slash => {
+                self.advance();
+                let right = self.term()?;
+                self.node(
+                    NodeType::Binary(Box::new(left), BinaryOp::Div, Box::new(right)),
                     start,
                 )
             }

@@ -66,6 +66,20 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
+            '*' => {
+                self.advance();
+                Ok(Token {
+                    ty: Star,
+                    range: start..self.index,
+                })
+            }
+            '/' => {
+                self.advance();
+                Ok(Token {
+                    ty: Slash,
+                    range: start..self.index,
+                })
+            }
             '\n' => {
                 self.advance();
                 Ok(Token {

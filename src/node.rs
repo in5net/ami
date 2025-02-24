@@ -9,6 +9,8 @@ pub enum UnaryOp {
 pub enum BinaryOp {
     Add,
     Sub,
+    Mul,
+    Div,
 }
 
 impl fmt::Display for BinaryOp {
@@ -16,6 +18,8 @@ impl fmt::Display for BinaryOp {
         match self {
             Self::Add => write!(f, "+"),
             Self::Sub => write!(f, "-"),
+            Self::Mul => write!(f, "×"),
+            Self::Div => write!(f, "÷"),
         }
     }
 }

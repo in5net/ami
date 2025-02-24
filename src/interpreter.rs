@@ -46,6 +46,12 @@ impl Interpreter {
                     BinaryOp::Sub => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a - b)),
                     },
+                    BinaryOp::Mul => match (l_value, r_value) {
+                        (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
+                    },
+                    BinaryOp::Div => match (l_value, r_value) {
+                        (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a / b)),
+                    },
                 }
             }
             NodeType::Statements(nodes) => {

@@ -5,6 +5,8 @@ pub enum TokenType {
     Number(Rc<str>),
     Plus,
     Minus,
+    Star,
+    Slash,
     Newline,
     EOF,
 }
@@ -15,6 +17,8 @@ impl fmt::Display for TokenType {
             Self::Number(value) => write!(f, "{}", value),
             Self::Plus => write!(f, "'+'"),
             Self::Minus => write!(f, "'-'"),
+            Self::Star => write!(f, "'*'"),
+            Self::Slash => write!(f, "'/'"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }
