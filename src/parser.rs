@@ -125,7 +125,7 @@ impl Parser {
         let left = self.atom()?;
 
         match self.token.ty {
-            Star => {
+            Star | Dot | Cross => {
                 self.advance();
                 let right = self.term()?;
                 self.node(
@@ -133,7 +133,7 @@ impl Parser {
                     start,
                 )
             }
-            Slash => {
+            Slash | Divide => {
                 self.advance();
                 let right = self.term()?;
                 self.node(

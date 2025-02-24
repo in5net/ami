@@ -6,7 +6,10 @@ pub enum TokenType {
     Plus,
     Minus,
     Star,
+    Dot,
+    Cross,
     Slash,
+    Divide,
     Newline,
     EOF,
 }
@@ -18,7 +21,10 @@ impl fmt::Display for TokenType {
             Self::Plus => write!(f, "'+'"),
             Self::Minus => write!(f, "'-'"),
             Self::Star => write!(f, "'*'"),
+            Self::Dot => write!(f, "'∙'"),
+            Self::Cross => write!(f, "'×'"),
             Self::Slash => write!(f, "'/'"),
+            Self::Divide => write!(f, "'÷'"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }

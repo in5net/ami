@@ -73,10 +73,38 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
-            '/' => {
+            '∙' => {
                 self.advance();
                 Ok(Token {
-                    ty: Slash,
+                    ty: Dot,
+                    range: start..self.index,
+                })
+            }
+            '×' => {
+                self.advance();
+                Ok(Token {
+                    ty: Cross,
+                    range: start..self.index,
+                })
+            }
+            '/' => {
+                self.advance();
+                if self.current_char == '/' {
+                    while self.current_char != '\n' {
+                        self.advance();
+                    }
+                    self.next_token()
+                } else {
+                    Ok(Token {
+                        ty: Slash,
+                        range: start..self.index,
+                    })
+                }
+            }
+            '÷' => {
+                self.advance();
+                Ok(Token {
+                    ty: Divide,
                     range: start..self.index,
                 })
             }
