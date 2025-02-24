@@ -1,16 +1,14 @@
-use crate::{AmiError, BinaryOp, Node, UnaryOp, Value};
+use std::ops::Range;
+
+use crate::{AmiError, BinaryOp, Node, NodeType, UnaryOp, Value};
 
 pub struct Interpreter {}
 
 type RuntimeError = Result<Value, AmiError>;
 
 impl Interpreter {
-    fn error<T>(&self, msg: String, reason: String) -> Result<T, AmiError> {
-        Err(AmiError {
-            msg,
-            reason,
-            range: 0..0,
-        })
+    fn error<T>(&self, msg: String, reason: String, range: Range<usize>) -> Result<T, AmiError> {
+        Err(AmiError { msg, reason, range })
     }
 
     pub fn run(&mut self, ast: Node) -> RuntimeError {
@@ -18,12 +16,16 @@ impl Interpreter {
     }
 
     fn visit(&mut self, node: Node) -> RuntimeError {
-        match node {
-            Node::Number(x) => match x.parse::<f64>() {
+        match node.ty {
+            NodeType::Number(x) => match x.parse::<f64>() {
                 Ok(x) => Ok(Value::Number(x)),
-                Err(e) => self.error(format!("cannot parse '{}' as a number", x), e.to_string()),
+                Err(e) => self.error(
+                    format!("cannot parse '{}' as a number", x),
+                    e.to_string(),
+                    node.range,
+                ),
             },
-            Node::Unary(op, node) => {
+            NodeType::Unary(op, node) => {
                 let value = self.visit(*node)?;
 
                 match op {
@@ -33,7 +35,7 @@ impl Interpreter {
                     },
                 }
             }
-            Node::Binary(left, op, right) => {
+            NodeType::Binary(left, op, right) => {
                 let l_value = self.visit(*left)?;
                 let r_value = self.visit(*right)?;
 
@@ -46,14 +48,14 @@ impl Interpreter {
                     },
                 }
             }
-            Node::Statements(nodes) => {
+            NodeType::Statements(nodes) => {
                 let mut rtn_value = Value::Number(0.0);
                 for node in nodes {
                     rtn_value = self.visit(node)?;
                 }
                 Ok(rtn_value)
             }
-            Node::EOF => Ok(Value::Number(0.0)),
+            NodeType::EOF => Ok(Value::Number(0.0)),
         }
     }
 }

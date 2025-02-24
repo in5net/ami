@@ -1,4 +1,4 @@
-use crate::{AmiError, BinaryOp, Node, Token, TokenType};
+use crate::{AmiError, BinaryOp, Node, NodeType, Token, TokenType};
 use std::vec::IntoIter;
 
 use TokenType::*;
@@ -29,6 +29,13 @@ impl Parser {
         });
     }
 
+    fn node(&self, ty: NodeType, start: usize) -> ParseResult {
+        Ok(Node {
+            ty,
+            range: start..self.token.range.end,
+        })
+    }
+
     fn error<T>(&self, msg: String, reason: String, start: usize) -> Result<T, AmiError> {
         Err(AmiError {
             msg,
@@ -51,6 +58,7 @@ impl Parser {
     }
 
     fn statements(&mut self) -> ParseResult {
+        let start = self.token.range.start;
         let mut statements: Vec<Node> = vec![];
         self.skip_newlines();
 
@@ -69,14 +77,14 @@ impl Parser {
             }
 
             let statement = self.statement()?;
-            if statement == Node::EOF {
+            if statement.ty == NodeType::EOF {
                 more_statements = false;
                 continue;
             }
             statements.push(statement);
         }
 
-        Ok(Node::Statements(statements))
+        self.node(NodeType::Statements(statements), start)
     }
 
     pub fn statement(&mut self) -> ParseResult {
@@ -88,27 +96,28 @@ impl Parser {
     }
 
     fn arith_expr(&mut self) -> ParseResult {
-        let result = self.atom()?;
+        let start = self.token.range.start;
+        let left = self.atom()?;
 
-        Ok(match self.token.ty {
+        match self.token.ty {
             Plus => {
                 self.advance();
-                Node::Binary(
-                    Box::new(result),
-                    BinaryOp::Add,
-                    Box::new(self.arith_expr()?),
+                let right = self.arith_expr()?;
+                self.node(
+                    NodeType::Binary(Box::new(left), BinaryOp::Add, Box::new(right)),
+                    start,
                 )
             }
             Minus => {
                 self.advance();
-                Node::Binary(
-                    Box::new(result),
-                    BinaryOp::Sub,
-                    Box::new(self.arith_expr()?),
+                let right = self.arith_expr()?;
+                self.node(
+                    NodeType::Binary(Box::new(left), BinaryOp::Sub, Box::new(right)),
+                    start,
                 )
             }
-            _ => result,
-        })
+            _ => Ok(left),
+        }
     }
 
     fn atom(&mut self) -> ParseResult {
@@ -117,9 +126,9 @@ impl Parser {
         match self.token.ty.clone() {
             Number(x) => {
                 self.advance();
-                Ok(Node::Number(x))
+                self.node(NodeType::Number(x), start)
             }
-            EOF => Ok(Node::EOF),
+            EOF => self.node(NodeType::EOF, start),
             _ => self.error(
                 "expected token".to_string(),
                 "expected number".to_string(),

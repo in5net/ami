@@ -96,7 +96,7 @@ impl Lexer {
         }
 
         Ok(Token {
-            ty: Number(num_str),
+            ty: Number(num_str.into()),
             range: start..self.index,
         })
     }

@@ -1,8 +1,8 @@
-use std::{fmt, ops::Range};
+use std::{fmt, ops::Range, rc::Rc};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
-    Number(String),
+    Number(Rc<str>),
     Plus,
     Minus,
     Newline,

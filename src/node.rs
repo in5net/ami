@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, ops::Range, rc::Rc};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum UnaryOp {
@@ -21,15 +21,15 @@ impl fmt::Display for BinaryOp {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Node {
-    Number(String),
+pub enum NodeType {
+    Number(Rc<str>),
     Unary(UnaryOp, Box<Node>),
     Binary(Box<Node>, BinaryOp, Box<Node>),
     Statements(Vec<Node>),
     EOF,
 }
 
-impl fmt::Display for Node {
+impl fmt::Display for NodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(x) => write!(f, "{}", x),
@@ -49,5 +49,17 @@ impl fmt::Display for Node {
             ),
             Self::EOF => write!(f, "<eof>"),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Node {
+    pub ty: NodeType,
+    pub range: Range<usize>,
+}
+
+impl fmt::Display for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.ty)
     }
 }
