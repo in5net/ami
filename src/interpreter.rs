@@ -33,6 +33,15 @@ impl Interpreter {
                     UnaryOp::Neg => match value {
                         Value::Number(x) => Ok(Value::Number(-x)),
                     },
+                    UnaryOp::Sqrt => match value {
+                        Value::Number(x) => Ok(Value::Number(x.sqrt())),
+                    },
+                    UnaryOp::Cbrt => match value {
+                        Value::Number(x) => Ok(Value::Number(x.cbrt())),
+                    },
+                    UnaryOp::Fort => match value {
+                        Value::Number(x) => Ok(Value::Number(x.powf(0.25))),
+                    },
                     UnaryOp::Degree => match value {
                         Value::Number(x) => Ok(Value::Number(x.to_radians())),
                     },

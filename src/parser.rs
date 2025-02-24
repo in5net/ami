@@ -169,7 +169,7 @@ impl Parser {
 
     fn power(&mut self) -> ParseResult {
         let start = self.token.range.start;
-        let result = self.atom()?;
+        let result = self.prefix()?;
 
         match self.token.ty {
             Carrot => {
@@ -181,6 +181,29 @@ impl Parser {
                 )
             }
             _ => Ok(result),
+        }
+    }
+
+    fn prefix(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+
+        match self.token.ty {
+            Sqrt => {
+                self.advance();
+                let left = self.prefix()?;
+                self.node(NodeType::Unary(UnaryOp::Sqrt, Box::new(left)), start)
+            }
+            Cbrt => {
+                self.advance();
+                let left = self.prefix()?;
+                self.node(NodeType::Unary(UnaryOp::Cbrt, Box::new(left)), start)
+            }
+            Fort => {
+                self.advance();
+                let left = self.prefix()?;
+                self.node(NodeType::Unary(UnaryOp::Fort, Box::new(left)), start)
+            }
+            _ => self.postfix(),
         }
     }
 

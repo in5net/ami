@@ -4,6 +4,9 @@ use std::{fmt, ops::Range, rc::Rc};
 pub enum UnaryOp {
     Pos,
     Neg,
+    Sqrt,
+    Cbrt,
+    Fort,
     Degree,
     Fact,
 }
@@ -46,6 +49,9 @@ impl fmt::Display for NodeType {
             Self::Unary(op, node) => match op {
                 UnaryOp::Pos => write!(f, "(+{})", node),
                 UnaryOp::Neg => write!(f, "(-{})", node),
+                UnaryOp::Sqrt => write!(f, "(√{})", node),
+                UnaryOp::Cbrt => write!(f, "(∛{})", node),
+                UnaryOp::Fort => write!(f, "(∜{})", node),
                 UnaryOp::Degree => write!(f, "({}°)", node),
                 UnaryOp::Fact => write!(f, "({}!)", node),
             },

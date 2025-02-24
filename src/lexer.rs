@@ -115,6 +115,27 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
+            '√' => {
+                self.advance();
+                Ok(Token {
+                    ty: Sqrt,
+                    range: start..self.index,
+                })
+            }
+            '∛' => {
+                self.advance();
+                Ok(Token {
+                    ty: Cbrt,
+                    range: start..self.index,
+                })
+            }
+            '∜' => {
+                self.advance();
+                Ok(Token {
+                    ty: Fort,
+                    range: start..self.index,
+                })
+            }
             '°' => {
                 self.advance();
                 Ok(Token {
