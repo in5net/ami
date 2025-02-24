@@ -48,18 +48,23 @@ impl Interpreter {
                     UnaryOp::Pos => Ok(value),
                     UnaryOp::Neg => match value {
                         Value::Number(x) => Ok(Value::Number(-x)),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Sqrt => match value {
                         Value::Number(x) => Ok(Value::Number(x.sqrt())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Cbrt => match value {
                         Value::Number(x) => Ok(Value::Number(x.cbrt())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Fort => match value {
                         Value::Number(x) => Ok(Value::Number(x.powf(0.25))),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Degree => match value {
                         Value::Number(x) => Ok(Value::Number(x.to_radians())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Fact => match value {
                         Value::Number(x) => Ok(Value::Number({
@@ -69,18 +74,23 @@ impl Interpreter {
                             }
                             product
                         })),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Abs => match value {
                         Value::Number(x) => Ok(Value::Number(x.abs())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Floor => match value {
                         Value::Number(x) => Ok(Value::Number(x.floor())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Ceil => match value {
                         Value::Number(x) => Ok(Value::Number(x.ceil())),
+                        _ => unimplemented!(),
                     },
                     UnaryOp::Round => match value {
                         Value::Number(x) => Ok(Value::Number(x.round())),
+                        _ => unimplemented!(),
                     },
                 }
             }
@@ -91,22 +101,52 @@ impl Interpreter {
                 match op {
                     BinaryOp::Add => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)),
+                        _ => unimplemented!(),
                     },
                     BinaryOp::Sub => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a - b)),
+                        _ => unimplemented!(),
                     },
                     BinaryOp::Mul => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
+                        _ => unimplemented!(),
                     },
                     BinaryOp::Div => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a / b)),
+                        _ => unimplemented!(),
                     },
                     BinaryOp::Mod => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a % b)),
+                        _ => unimplemented!(),
                     },
                     BinaryOp::Pow => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a.powf(b))),
+                        _ => unimplemented!(),
                     },
+                }
+            }
+            NodeType::FnDef(name, arg_names, node) => {
+                let function = Value::Function(name.clone(), arg_names, node);
+                self.scope.set(name, function.clone());
+                Ok(function)
+            }
+            NodeType::Call(name, args) => {
+                let mut arg_values: Vec<Value> = vec![];
+                for arg in args {
+                    let value = self.visit(arg)?;
+                    arg_values.push(value);
+                }
+
+                let function = self.scope.get(&name);
+                match function {
+                    Value::Function(_, arg_names, body) => {
+                        let mut interpreter = Interpreter::default();
+                        for (name, value) in arg_names.iter().zip(arg_values) {
+                            interpreter.scope.set(name.clone(), value.clone());
+                        }
+                        interpreter.visit(*body)
+                    }
+                    _ => panic!("{} is not a function", name),
                 }
             }
             NodeType::Statements(nodes) => {

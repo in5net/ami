@@ -44,6 +44,8 @@ pub enum NodeType {
     Assignment(Rc<str>, Box<Node>),
     Unary(UnaryOp, Box<Node>),
     Binary(Box<Node>, BinaryOp, Box<Node>),
+    FnDef(Rc<str>, Vec<Rc<str>>, Box<Node>),
+    Call(Rc<str>, Vec<Node>),
     Statements(Vec<Node>),
     EOF,
 }
@@ -68,6 +70,25 @@ impl fmt::Display for NodeType {
                 UnaryOp::Fact => write!(f, "({}!)", node),
             },
             Self::Binary(left, op, right) => write!(f, "({} {} {})", left, op, right),
+            Self::FnDef(name, args, body) => write!(
+                f,
+                "fn {}({}) {{\n  {}\n}}",
+                name,
+                args.iter()
+                    .map(|arg| format!("{}", arg))
+                    .collect::<Vec<String>>()
+                    .join(", "),
+                body
+            ),
+            Self::Call(name, args) => write!(
+                f,
+                "{}({})",
+                name,
+                args.iter()
+                    .map(|arg| format!("{}", arg))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ),
             Self::Statements(nodes) => write!(
                 f,
                 "{{\n  {}\n}}",

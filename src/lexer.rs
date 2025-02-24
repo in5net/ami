@@ -221,6 +221,13 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
+            ',' => {
+                self.advance();
+                Ok(Token {
+                    ty: Comma,
+                    range: start..self.index,
+                })
+            }
             '\n' => {
                 self.advance();
                 Ok(Token {

@@ -1,5 +1,5 @@
 use crate::{AmiError, BinaryOp, Node, NodeType, Token, TokenType, UnaryOp};
-use std::{iter::Peekable, vec::IntoIter};
+use std::{iter::Peekable, rc::Rc, vec::IntoIter};
 
 use TokenType::*;
 
@@ -230,7 +230,7 @@ impl Parser {
 
     fn postfix(&mut self) -> ParseResult {
         let start = self.token.range.start;
-        let result = self.atom()?;
+        let result = self.call()?;
 
         match self.token.ty {
             Exclamation => {
@@ -240,6 +240,56 @@ impl Parser {
             Degree => {
                 self.advance();
                 self.node(NodeType::Unary(UnaryOp::Degree, Box::new(result)), start)
+            }
+            _ => Ok(result),
+        }
+    }
+
+    fn call(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+        let result = self.atom()?;
+
+        match self.token.ty {
+            LeftParen => {
+                let list_start = self.token.range.start;
+                let name = match result.ty {
+                    NodeType::Identifier(ref name) => Rc::clone(name),
+                    _ => panic!("expected identifier"),
+                };
+                self.advance();
+
+                let args = self.list(list_start, RightParen)?;
+
+                match self.token.ty {
+                    Eq => {
+                        self.advance();
+
+                        let mut arg_names: Vec<Rc<str>> = vec![];
+                        for node in args {
+                            let arg = match node.ty {
+                                NodeType::Identifier(name) => Ok(name),
+                                _ => self.error(
+                                    "expected identifier".to_string(),
+                                    "".to_string(),
+                                    start,
+                                ),
+                            }?;
+                            arg_names.push(arg);
+                        }
+
+                        let body = self.expr()?;
+
+                        self.node(NodeType::FnDef(name, arg_names, Box::new(body)), start)
+                    }
+                    _ => match result.ty {
+                        NodeType::Identifier(name) => self.node(NodeType::Call(name, args), start),
+                        _ => self.error(
+                            "expected token".to_string(),
+                            "there should be an identifier here".to_string(),
+                            start,
+                        ),
+                    },
+                }
             }
             _ => Ok(result),
         }
@@ -332,5 +382,35 @@ impl Parser {
                 start,
             ),
         }
+    }
+
+    fn list(&mut self, start: usize, end: TokenType) -> Result<Vec<Node>, AmiError> {
+        let mut nodes: Vec<Node> = vec![];
+
+        while self.token.ty != end {
+            nodes.push(self.expr()?);
+            match &self.token.ty {
+                Comma => self.advance(),
+                token if *token == end => {}
+                _ => {
+                    return self.error(
+                        "expected token".to_string(),
+                        format!("expected {} or {}", Comma, end),
+                        start,
+                    )
+                }
+            };
+        }
+
+        if self.token.ty != end {
+            return self.error(
+                "expected token".to_string(),
+                format!("expected {}", end),
+                start,
+            );
+        }
+        self.advance();
+
+        Ok(nodes)
     }
 }

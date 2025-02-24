@@ -29,6 +29,7 @@ pub enum TokenType {
     RightFloor,
     LeftCeil,
     RightCeil,
+    Comma,
     Newline,
     EOF,
 }
@@ -63,6 +64,7 @@ impl fmt::Display for TokenType {
             Self::RightFloor => write!(f, "'⌋'"),
             Self::LeftCeil => write!(f, "'⌈'"),
             Self::RightCeil => write!(f, "'⌉'"),
+            Self::Comma => write!(f, "','"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }
