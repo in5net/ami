@@ -1,11 +1,14 @@
-use crate::Token;
-use Token::*;
+use crate::{AmiError, Token, TokenType};
+
+use TokenType::*;
 
 pub struct Lexer {
     source: String,
     index: usize,
     current_char: char,
 }
+
+type LexResult = Result<Token, AmiError>;
 
 impl Lexer {
     pub fn new(source: String) -> Self {
@@ -22,43 +25,69 @@ impl Lexer {
         self.current_char = ch;
     }
 
-    pub fn lex(&mut self) -> Vec<Token> {
-        let mut tokens: Vec<Token> = vec![];
-        let mut token = self.next_token();
-        while token != EOF {
-            tokens.push(token);
-            token = self.next_token();
-        }
-        tokens.push(token);
-        tokens
+    fn error(&self, msg: String, reason: String, start: usize) -> LexResult {
+        Err(AmiError {
+            msg,
+            reason,
+            range: start..self.index,
+        })
     }
 
-    pub fn next_token(&mut self) -> Token {
+    pub fn lex(&mut self) -> Result<Vec<Token>, AmiError> {
+        let mut tokens: Vec<Token> = vec![];
+        let mut token = self.next_token()?;
+        while token.ty != EOF {
+            tokens.push(token);
+            token = self.next_token()?;
+        }
+        tokens.push(token);
+        Ok(tokens)
+    }
+
+    pub fn next_token(&mut self) -> LexResult {
         while matches!(self.current_char, ' ' | '\t' | '\r') {
             self.advance();
         }
 
+        let start = self.index;
         match self.current_char {
             '0'..='9' => self.number(),
             '+' => {
                 self.advance();
-                Plus
+                Ok(Token {
+                    ty: Plus,
+                    range: start..self.index,
+                })
             }
             '-' => {
                 self.advance();
-                Minus
+                Ok(Token {
+                    ty: Minus,
+                    range: start..self.index,
+                })
             }
             '\n' => {
                 self.advance();
-                Newline
+                Ok(Token {
+                    ty: Newline,
+                    range: start..self.index,
+                })
             }
-            '\0' => EOF,
-            _ => panic!("'{}' is not a valid character", self.current_char),
+            '\0' => Ok(Token {
+                ty: EOF,
+                range: start..self.index,
+            }),
+            _ => self.error(
+                "invalid character".to_string(),
+                format!("'{}' is not a valid character", self.current_char),
+                start,
+            ),
         }
     }
 
-    fn number(&mut self) -> Token {
-        let mut num_str: String = self.current_char.to_string();
+    fn number(&mut self) -> LexResult {
+        let start = self.index;
+        let mut num_str = self.current_char.to_string();
         self.advance();
 
         while "0123456789.".contains(self.current_char) {
@@ -66,6 +95,9 @@ impl Lexer {
             self.advance();
         }
 
-        Token::Number(num_str)
+        Ok(Token {
+            ty: Number(num_str),
+            range: start..self.index,
+        })
     }
 }

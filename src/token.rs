@@ -1,7 +1,7 @@
-use std::fmt;
+use std::{fmt, ops::Range};
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Token {
+pub enum TokenType {
     Number(String),
     Plus,
     Minus,
@@ -9,7 +9,7 @@ pub enum Token {
     EOF,
 }
 
-impl fmt::Display for Token {
+impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(value) => write!(f, "{}", value),
@@ -18,5 +18,17 @@ impl fmt::Display for Token {
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Token {
+    pub ty: TokenType,
+    pub range: Range<usize>,
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.ty)
     }
 }
