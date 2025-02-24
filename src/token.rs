@@ -3,6 +3,8 @@ use std::{fmt, ops::Range, rc::Rc};
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
     Number(Rc<str>),
+    Identifier(Rc<str>),
+    Eq,
     Plus,
     Minus,
     Star,
@@ -11,6 +13,7 @@ pub enum TokenType {
     Slash,
     Divide,
     Percent,
+    Mod,
     Carrot,
     Sqrt,
     Cbrt,
@@ -34,6 +37,8 @@ impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(value) => write!(f, "{}", value),
+            Self::Identifier(name) => write!(f, "{}", name),
+            Self::Eq => write!(f, "'='"),
             Self::Plus => write!(f, "'+'"),
             Self::Minus => write!(f, "'-'"),
             Self::Star => write!(f, "'*'"),
@@ -42,6 +47,7 @@ impl fmt::Display for TokenType {
             Self::Slash => write!(f, "'/'"),
             Self::Divide => write!(f, "'÷'"),
             Self::Percent => write!(f, "'%'"),
+            Self::Mod => write!(f, "'mod'"),
             Self::Carrot => write!(f, "'^'"),
             Self::Sqrt => write!(f, "'√'"),
             Self::Cbrt => write!(f, "'∛'"),

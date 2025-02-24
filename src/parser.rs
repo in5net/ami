@@ -1,10 +1,10 @@
 use crate::{AmiError, BinaryOp, Node, NodeType, Token, TokenType, UnaryOp};
-use std::vec::IntoIter;
+use std::{iter::Peekable, vec::IntoIter};
 
 use TokenType::*;
 
 pub struct Parser {
-    tokens: IntoIter<Token>,
+    tokens: Peekable<IntoIter<Token>>,
     token: Token,
 }
 
@@ -12,13 +12,20 @@ type ParseResult = Result<Node, AmiError>;
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        let mut iter = tokens.into_iter();
+        let mut iter = tokens.into_iter().peekable();
         Self {
             token: iter.next().unwrap_or(Token {
                 ty: EOF,
                 range: Default::default(),
             }),
             tokens: iter,
+        }
+    }
+
+    fn peek(&mut self) -> &TokenType {
+        match self.tokens.peek() {
+            Some(token) => &token.ty,
+            None => &EOF,
         }
     }
 
@@ -93,12 +100,26 @@ impl Parser {
 
     fn expr(&mut self) -> ParseResult {
         let start = self.token.range.start;
+
+        match (self.token.ty.clone(), self.peek()) {
+            (Identifier(name), Eq) => {
+                self.advance();
+                self.advance();
+                let right = self.arith_expr()?;
+                self.node(NodeType::Assignment(name, Box::new(right)), start)
+            }
+            _ => self.arith_expr(),
+        }
+    }
+
+    fn arith_expr(&mut self) -> ParseResult {
+        let start = self.token.range.start;
         let left = self.term()?;
 
         match self.token.ty {
             Plus => {
                 self.advance();
-                let right = self.expr()?;
+                let right = self.arith_expr()?;
                 self.node(
                     NodeType::Binary(Box::new(left), BinaryOp::Add, Box::new(right)),
                     start,
@@ -106,7 +127,7 @@ impl Parser {
             }
             Minus => {
                 self.advance();
-                let right = self.expr()?;
+                let right = self.arith_expr()?;
                 self.node(
                     NodeType::Binary(Box::new(left), BinaryOp::Sub, Box::new(right)),
                     start,
@@ -137,7 +158,7 @@ impl Parser {
                     start,
                 )
             }
-            Percent => {
+            Percent | Mod => {
                 self.advance();
                 let right = self.term()?;
                 self.node(
@@ -232,9 +253,13 @@ impl Parser {
                 self.advance();
                 self.node(NodeType::Number(x), start)
             }
+            Identifier(name) => {
+                self.advance();
+                self.node(NodeType::Identifier(name), start)
+            }
             LeftParen => {
                 self.advance();
-                let result = self.expr()?;
+                let result = self.arith_expr()?;
 
                 if self.token.ty != RightParen {
                     return self.error(
@@ -249,7 +274,7 @@ impl Parser {
             }
             Pipe => {
                 self.advance();
-                let result = self.expr()?;
+                let result = self.arith_expr()?;
 
                 if self.token.ty != Pipe {
                     return self.error(
@@ -264,7 +289,7 @@ impl Parser {
             }
             LeftFloor => {
                 self.advance();
-                let result = self.expr()?;
+                let result = self.arith_expr()?;
 
                 match self.token.ty {
                     RightFloor => {
@@ -284,7 +309,7 @@ impl Parser {
             }
             LeftCeil => {
                 self.advance();
-                let result = self.expr()?;
+                let result = self.arith_expr()?;
 
                 if self.token.ty != RightCeil {
                     return self.error(
@@ -301,7 +326,7 @@ impl Parser {
             _ => self.error(
                 "expected token".to_string(),
                 format!(
-                    "expected number, {}, {}, {}, or {}",
+                    "expected number, variable, function name, {}, {}, {}, or {}",
                     LeftParen, Pipe, LeftFloor, LeftCeil
                 ),
                 start,

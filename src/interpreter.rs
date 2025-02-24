@@ -1,8 +1,18 @@
 use std::ops::Range;
 
-use crate::{AmiError, BinaryOp, Node, NodeType, UnaryOp, Value};
+use crate::{AmiError, BinaryOp, Node, NodeType, Scope, UnaryOp, Value};
 
-pub struct Interpreter {}
+pub struct Interpreter {
+    pub scope: Scope,
+}
+
+impl Default for Interpreter {
+    fn default() -> Self {
+        Self {
+            scope: Scope::default(),
+        }
+    }
+}
 
 type RuntimeError = Result<Value, AmiError>;
 
@@ -25,6 +35,12 @@ impl Interpreter {
                     node.range,
                 ),
             },
+            NodeType::Identifier(name) => Ok(self.scope.get(&name)),
+            NodeType::Assignment(name, node) => {
+                let value = self.visit(*node)?;
+                self.scope.set(name, value.clone());
+                Ok(value)
+            }
             NodeType::Unary(op, node) => {
                 let value = self.visit(*node)?;
 

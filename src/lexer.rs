@@ -52,6 +52,14 @@ impl Lexer {
         let start = self.index;
         match self.current_char {
             '0'..='9' => self.number(),
+            'a'..='z' | 'A'..='Z' | '_' | 'Α'..='ω' | '∞' => self.word(),
+            '=' => {
+                self.advance();
+                Ok(Token {
+                    ty: Eq,
+                    range: start..self.index,
+                })
+            }
             '+' => {
                 self.advance();
                 Ok(Token {
@@ -244,6 +252,30 @@ impl Lexer {
 
         Ok(Token {
             ty: Number(num_str.into()),
+            range: start..self.index,
+        })
+    }
+
+    fn word(&mut self) -> LexResult {
+        let start = self.index;
+        let mut word = self.current_char.to_string();
+        self.advance();
+
+        while self.current_char != '\0' {
+            match self.current_char {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | 'Α'..='ω' | '∞' => {
+                    word.push(self.current_char);
+                    self.advance();
+                }
+                _ => break,
+            };
+        }
+
+        Ok(Token {
+            ty: match word.as_str() {
+                "mod" => Mod,
+                _ => Identifier(word.into()),
+            },
             range: start..self.index,
         })
     }

@@ -40,6 +40,8 @@ impl fmt::Display for BinaryOp {
 #[derive(Debug, Clone, PartialEq)]
 pub enum NodeType {
     Number(Rc<str>),
+    Identifier(Rc<str>),
+    Assignment(Rc<str>, Box<Node>),
     Unary(UnaryOp, Box<Node>),
     Binary(Box<Node>, BinaryOp, Box<Node>),
     Statements(Vec<Node>),
@@ -50,6 +52,8 @@ impl fmt::Display for NodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Number(x) => write!(f, "{}", x),
+            Self::Identifier(name) => write!(f, "{}", name),
+            Self::Assignment(name, node) => write!(f, "({} = {})", name, node),
             Self::Unary(op, node) => match op {
                 UnaryOp::Pos => write!(f, "(+{})", node),
                 UnaryOp::Neg => write!(f, "(-{})", node),

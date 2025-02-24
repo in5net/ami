@@ -11,6 +11,7 @@ mod interpreter;
 mod lexer;
 mod node;
 mod parser;
+mod scope;
 mod token;
 mod value;
 
@@ -18,6 +19,7 @@ pub use error::*;
 pub use interpreter::*;
 pub use lexer::*;
 pub use node::*;
+pub use scope::*;
 pub use token::*;
 pub use value::*;
 
@@ -37,13 +39,13 @@ fn main() {
         Some(file) => {
             let path = Path::new(&file);
             let input = fs::read_to_string(path).expect("Could not read file");
-            run(input, args.verbose, &mut Interpreter {});
+            run(input, args.verbose, &mut Interpreter::default());
         }
         None => {
             let stdin = io::stdin();
             let mut stdout = io::stdout();
 
-            let mut interpreter = Interpreter {};
+            let mut interpreter = Interpreter::default();
 
             loop {
                 write!(&stdout, "> ").expect("Could not show prompt");
