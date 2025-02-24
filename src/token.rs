@@ -12,6 +12,8 @@ pub enum TokenType {
     Divide,
     Percent,
     Carrot,
+    Degree,
+    Exclamation,
     Newline,
     EOF,
 }
@@ -29,6 +31,8 @@ impl fmt::Display for TokenType {
             Self::Divide => write!(f, "'÷'"),
             Self::Percent => write!(f, "'%'"),
             Self::Carrot => write!(f, "'^'"),
+            Self::Degree => write!(f, "'°'"),
+            Self::Exclamation => write!(f, "'!'"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }

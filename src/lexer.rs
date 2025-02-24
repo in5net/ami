@@ -115,6 +115,20 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
+            '°' => {
+                self.advance();
+                Ok(Token {
+                    ty: Degree,
+                    range: start..self.index,
+                })
+            }
+            '!' => {
+                self.advance();
+                Ok(Token {
+                    ty: Exclamation,
+                    range: start..self.index,
+                })
+            }
             '\n' => {
                 self.advance();
                 Ok(Token {

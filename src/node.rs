@@ -4,6 +4,8 @@ use std::{fmt, ops::Range, rc::Rc};
 pub enum UnaryOp {
     Pos,
     Neg,
+    Degree,
+    Fact,
 }
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum BinaryOp {
@@ -44,6 +46,8 @@ impl fmt::Display for NodeType {
             Self::Unary(op, node) => match op {
                 UnaryOp::Pos => write!(f, "(+{})", node),
                 UnaryOp::Neg => write!(f, "(-{})", node),
+                UnaryOp::Degree => write!(f, "({}°)", node),
+                UnaryOp::Fact => write!(f, "({}!)", node),
             },
             Self::Binary(left, op, right) => write!(f, "({} {} {})", left, op, right),
             Self::Statements(nodes) => write!(

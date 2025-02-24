@@ -184,6 +184,23 @@ impl Parser {
         }
     }
 
+    fn postfix(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+        let result = self.atom()?;
+
+        match self.token.ty {
+            Exclamation => {
+                self.advance();
+                self.node(NodeType::Unary(UnaryOp::Fact, Box::new(result)), start)
+            }
+            Degree => {
+                self.advance();
+                self.node(NodeType::Unary(UnaryOp::Degree, Box::new(result)), start)
+            }
+            _ => Ok(result),
+        }
+    }
+
     fn atom(&mut self) -> ParseResult {
         let start = self.token.range.start;
 

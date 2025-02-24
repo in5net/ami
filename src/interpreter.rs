@@ -33,6 +33,18 @@ impl Interpreter {
                     UnaryOp::Neg => match value {
                         Value::Number(x) => Ok(Value::Number(-x)),
                     },
+                    UnaryOp::Degree => match value {
+                        Value::Number(x) => Ok(Value::Number(x.to_radians())),
+                    },
+                    UnaryOp::Fact => match value {
+                        Value::Number(x) => Ok(Value::Number({
+                            let mut product = 0.0;
+                            for n in 1..(x as i32) {
+                                product *= n as f64;
+                            }
+                            product
+                        })),
+                    },
                 }
             }
             NodeType::Binary(left, op, right) => {
