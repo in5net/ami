@@ -54,6 +54,18 @@ impl Interpreter {
                             product
                         })),
                     },
+                    UnaryOp::Abs => match value {
+                        Value::Number(x) => Ok(Value::Number(x.abs())),
+                    },
+                    UnaryOp::Floor => match value {
+                        Value::Number(x) => Ok(Value::Number(x.floor())),
+                    },
+                    UnaryOp::Ceil => match value {
+                        Value::Number(x) => Ok(Value::Number(x.ceil())),
+                    },
+                    UnaryOp::Round => match value {
+                        Value::Number(x) => Ok(Value::Number(x.round())),
+                    },
                 }
             }
             NodeType::Binary(left, op, right) => {

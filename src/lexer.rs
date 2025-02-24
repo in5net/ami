@@ -150,6 +150,69 @@ impl Lexer {
                     range: start..self.index,
                 })
             }
+            '(' => {
+                self.advance();
+                Ok(Token {
+                    ty: LeftParen,
+                    range: start..self.index,
+                })
+            }
+            ')' => {
+                self.advance();
+                Ok(Token {
+                    ty: RightParen,
+                    range: start..self.index,
+                })
+            }
+            '{' => {
+                self.advance();
+                Ok(Token {
+                    ty: LeftBrace,
+                    range: start..self.index,
+                })
+            }
+            '}' => {
+                self.advance();
+                Ok(Token {
+                    ty: RightBrace,
+                    range: start..self.index,
+                })
+            }
+            '|' => {
+                self.advance();
+                Ok(Token {
+                    ty: Pipe,
+                    range: start..self.index,
+                })
+            }
+            '⌊' => {
+                self.advance();
+                Ok(Token {
+                    ty: LeftFloor,
+                    range: start..self.index,
+                })
+            }
+            '⌋' => {
+                self.advance();
+                Ok(Token {
+                    ty: RightFloor,
+                    range: start..self.index,
+                })
+            }
+            '⌈' => {
+                self.advance();
+                Ok(Token {
+                    ty: LeftCeil,
+                    range: start..self.index,
+                })
+            }
+            '⌉' => {
+                self.advance();
+                Ok(Token {
+                    ty: RightCeil,
+                    range: start..self.index,
+                })
+            }
             '\n' => {
                 self.advance();
                 Ok(Token {

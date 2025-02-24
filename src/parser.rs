@@ -232,10 +232,78 @@ impl Parser {
                 self.advance();
                 self.node(NodeType::Number(x), start)
             }
+            LeftParen => {
+                self.advance();
+                let result = self.expr()?;
+
+                if self.token.ty != RightParen {
+                    return self.error(
+                        "expected token".to_string(),
+                        format!("expected {}", RightParen),
+                        start,
+                    );
+                }
+                self.advance();
+
+                Ok(result)
+            }
+            Pipe => {
+                self.advance();
+                let result = self.expr()?;
+
+                if self.token.ty != Pipe {
+                    return self.error(
+                        "expected token".to_string(),
+                        format!("expected {}", Pipe),
+                        start,
+                    );
+                }
+                self.advance();
+
+                self.node(NodeType::Unary(UnaryOp::Abs, Box::new(result)), start)
+            }
+            LeftFloor => {
+                self.advance();
+                let result = self.expr()?;
+
+                match self.token.ty {
+                    RightFloor => {
+                        self.advance();
+                        self.node(NodeType::Unary(UnaryOp::Floor, Box::new(result)), start)
+                    }
+                    RightCeil => {
+                        self.advance();
+                        self.node(NodeType::Unary(UnaryOp::Abs, Box::new(result)), start)
+                    }
+                    _ => self.error(
+                        "expected token".to_string(),
+                        format!("expected {} or {}", RightFloor, RightCeil),
+                        start,
+                    ),
+                }
+            }
+            LeftCeil => {
+                self.advance();
+                let result = self.expr()?;
+
+                if self.token.ty != RightCeil {
+                    return self.error(
+                        "expected token".to_string(),
+                        format!("expected {}", RightCeil),
+                        start,
+                    );
+                }
+                self.advance();
+
+                self.node(NodeType::Unary(UnaryOp::Ceil, Box::new(result)), start)
+            }
             EOF => self.node(NodeType::EOF, start),
             _ => self.error(
                 "expected token".to_string(),
-                "expected number".to_string(),
+                format!(
+                    "expected number, {}, {}, {}, or {}",
+                    LeftParen, Pipe, LeftFloor, LeftCeil
+                ),
                 start,
             ),
         }
