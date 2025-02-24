@@ -10,6 +10,7 @@ pub enum TokenType {
     Cross,
     Slash,
     Divide,
+    Percent,
     Newline,
     EOF,
 }
@@ -25,6 +26,7 @@ impl fmt::Display for TokenType {
             Self::Cross => write!(f, "'×'"),
             Self::Slash => write!(f, "'/'"),
             Self::Divide => write!(f, "'÷'"),
+            Self::Percent => write!(f, "'%'"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }

@@ -141,6 +141,14 @@ impl Parser {
                     start,
                 )
             }
+            Percent => {
+                self.advance();
+                let right = self.term()?;
+                self.node(
+                    NodeType::Binary(Box::new(left), BinaryOp::Mod, Box::new(right)),
+                    start,
+                )
+            }
             _ => Ok(left),
         }
     }
