@@ -55,6 +55,9 @@ impl Interpreter {
                     BinaryOp::Mod => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a % b)),
                     },
+                    BinaryOp::Pow => match (l_value, r_value) {
+                        (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a.powf(b))),
+                    },
                 }
             }
             NodeType::Statements(nodes) => {

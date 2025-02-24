@@ -1,4 +1,4 @@
-use crate::{AmiError, BinaryOp, Node, NodeType, Token, TokenType};
+use crate::{AmiError, BinaryOp, Node, NodeType, Token, TokenType, UnaryOp};
 use std::vec::IntoIter;
 
 use TokenType::*;
@@ -92,17 +92,13 @@ impl Parser {
     }
 
     fn expr(&mut self) -> ParseResult {
-        self.arith_expr()
-    }
-
-    fn arith_expr(&mut self) -> ParseResult {
         let start = self.token.range.start;
         let left = self.term()?;
 
         match self.token.ty {
             Plus => {
                 self.advance();
-                let right = self.arith_expr()?;
+                let right = self.expr()?;
                 self.node(
                     NodeType::Binary(Box::new(left), BinaryOp::Add, Box::new(right)),
                     start,
@@ -110,7 +106,7 @@ impl Parser {
             }
             Minus => {
                 self.advance();
-                let right = self.arith_expr()?;
+                let right = self.expr()?;
                 self.node(
                     NodeType::Binary(Box::new(left), BinaryOp::Sub, Box::new(right)),
                     start,
@@ -122,7 +118,7 @@ impl Parser {
 
     fn term(&mut self) -> ParseResult {
         let start = self.token.range.start;
-        let left = self.atom()?;
+        let left = self.factor()?;
 
         match self.token.ty {
             Star | Dot | Cross => {
@@ -150,6 +146,41 @@ impl Parser {
                 )
             }
             _ => Ok(left),
+        }
+    }
+
+    fn factor(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+
+        match self.token.ty {
+            Plus => {
+                self.advance();
+                let right = self.factor()?;
+                self.node(NodeType::Unary(UnaryOp::Pos, Box::new(right)), start)
+            }
+            Minus => {
+                self.advance();
+                let right = self.factor()?;
+                self.node(NodeType::Unary(UnaryOp::Neg, Box::new(right)), start)
+            }
+            _ => self.power(),
+        }
+    }
+
+    fn power(&mut self) -> ParseResult {
+        let start = self.token.range.start;
+        let result = self.atom()?;
+
+        match self.token.ty {
+            Carrot => {
+                self.advance();
+                let exponent = self.factor()?;
+                self.node(
+                    NodeType::Binary(Box::new(result), BinaryOp::Pow, Box::new(exponent)),
+                    start,
+                )
+            }
+            _ => Ok(result),
         }
     }
 

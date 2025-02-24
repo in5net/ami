@@ -12,6 +12,7 @@ pub enum BinaryOp {
     Mul,
     Div,
     Mod,
+    Pow,
 }
 
 impl fmt::Display for BinaryOp {
@@ -21,7 +22,8 @@ impl fmt::Display for BinaryOp {
             Self::Sub => write!(f, "-"),
             Self::Mul => write!(f, "×"),
             Self::Div => write!(f, "÷"),
-            Self::Mod => write!(f, "%"),
+            Self::Mod => write!(f, "mod"),
+            Self::Pow => write!(f, "^"),
         }
     }
 }

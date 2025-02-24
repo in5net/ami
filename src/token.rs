@@ -11,6 +11,7 @@ pub enum TokenType {
     Slash,
     Divide,
     Percent,
+    Carrot,
     Newline,
     EOF,
 }
@@ -27,6 +28,7 @@ impl fmt::Display for TokenType {
             Self::Slash => write!(f, "'/'"),
             Self::Divide => write!(f, "'÷'"),
             Self::Percent => write!(f, "'%'"),
+            Self::Carrot => write!(f, "'^'"),
             Self::Newline => write!(f, "'\\n'"),
             Self::EOF => write!(f, "<eof>"),
         }

@@ -89,17 +89,10 @@ impl Lexer {
             }
             '/' => {
                 self.advance();
-                if self.current_char == '/' {
-                    while self.current_char != '\n' {
-                        self.advance();
-                    }
-                    self.next_token()
-                } else {
-                    Ok(Token {
-                        ty: Slash,
-                        range: start..self.index,
-                    })
-                }
+                Ok(Token {
+                    ty: Slash,
+                    range: start..self.index,
+                })
             }
             '÷' => {
                 self.advance();
@@ -112,6 +105,13 @@ impl Lexer {
                 self.advance();
                 Ok(Token {
                     ty: Percent,
+                    range: start..self.index,
+                })
+            }
+            '^' => {
+                self.advance();
+                Ok(Token {
+                    ty: Carrot,
                     range: start..self.index,
                 })
             }
