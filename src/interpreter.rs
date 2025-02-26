@@ -277,16 +277,40 @@ impl Interpreter {
             }
         });
         add_fn!("min", |args| {
-            match (args.get(0), args.get(1)) {
-                (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(a.min(*b))),
-                _ => Err("expected 2 numbers".to_string()),
+            if args.len() < 1 {
+                return Err("expected at least 1 argument".to_string());
             }
+
+            let mut min = f64::INFINITY;
+            for arg in args {
+                match arg {
+                    Value::Number(x) => {
+                        if *x < min {
+                            min = *x;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Value::Number(min))
         });
         add_fn!("max", |args| {
-            match (args.get(0), args.get(1)) {
-                (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(a.max(*b))),
-                _ => Err("expected 2 numbers".to_string()),
+            if args.len() < 1 {
+                return Err("expected at least 1 argument".to_string());
             }
+
+            let mut min = f64::NEG_INFINITY;
+            for arg in args {
+                match arg {
+                    Value::Number(x) => {
+                        if *x < min {
+                            min = *x;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Ok(Value::Number(min))
         });
         add_fn!("clamp", |args| {
             match (args.get(0), args.get(1), args.get(2)) {
