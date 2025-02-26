@@ -6,7 +6,7 @@ use crate::Node;
 pub enum Value {
     Number(f64),
     Function(Rc<str>, Vec<Rc<str>>, Box<Node>),
-    NativeFunction(fn(&Vec<Value>) -> Value),
+    NativeFunction(fn(&Vec<Value>) -> Result<Value, String>),
 }
 
 impl From<i32> for Value {

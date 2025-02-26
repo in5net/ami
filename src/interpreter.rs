@@ -148,8 +148,15 @@ impl Interpreter {
                         }
                         interpreter.visit(*body)
                     }
-                    Value::NativeFunction(function) => Ok(function(&arg_values)),
-                    _ => panic!("{} is not a function", name),
+                    Value::NativeFunction(function) => match function(&arg_values) {
+                        Ok(value) => Ok(value),
+                        Err(reason) => self.error("".to_string(), reason, node.range),
+                    },
+                    _ => self.error(
+                        format!("{} is not a function", name),
+                        "".to_string(),
+                        node.range,
+                    ),
                 }
             }
             NodeType::Statements(nodes) => {
@@ -184,165 +191,109 @@ impl Interpreter {
         }
 
         add_fn!("abs", |args| {
-            if args.len() != 1 {
-                panic!("abs expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.abs()),
-                _ => panic!("abs expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.abs())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("floor", |args| {
-            if args.len() != 1 {
-                panic!("floor expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.floor()),
-                _ => panic!("floor expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.floor())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("ceil", |args| {
-            if args.len() != 1 {
-                panic!("ceil expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.ceil()),
-                _ => panic!("ceil expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.ceil())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("round", |args| {
-            if args.len() != 1 {
-                panic!("round expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.round()),
-                _ => panic!("round expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.round())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("trunc", |args| {
-            if args.len() != 1 {
-                panic!("trunc expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.trunc()),
-                _ => panic!("trunc expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.trunc())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("fract", |args| {
-            if args.len() != 1 {
-                panic!("fract expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.fract()),
-                _ => panic!("fract expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.fract())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("sqrt", |args| {
-            if args.len() != 1 {
-                panic!("sqrt expects 1 argument, got {}", args.len());
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.sqrt())),
+                _ => Err("expected a number".to_string()),
             }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.cbrt()),
-                _ => panic!("sqrt expects a number"),
+        });
+        add_fn!("cbrt", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.cbrt())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("ln", |args| {
-            if args.len() != 1 {
-                panic!("ln expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.ln()),
-                _ => panic!("ln expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.ln())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("sin", |args| {
-            if args.len() != 1 {
-                panic!("sin expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.sin()),
-                _ => panic!("sin expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.sin())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("cos", |args| {
-            if args.len() != 1 {
-                panic!("cos expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.cos()),
-                _ => panic!("cos expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.cos())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("tan", |args| {
-            if args.len() != 1 {
-                panic!("tan expects 1 argument, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(value) => Value::Number(value.tan()),
-                _ => panic!("tan expects a number"),
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.tan())),
+                _ => Err("expected a number".to_string()),
             }
         });
         add_fn!("gcd", |args| {
-            if args.len() != 2 {
-                panic!("gcd expects 2 arguments, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(a) => match args[1] {
-                    Value::Number(b) => Value::Number(gcd(a, b)),
-                    _ => panic!("gcd expects 2 integers"),
-                },
-                _ => panic!("gcd expects 2 integers"),
+            match (args.get(0), args.get(1)) {
+                (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(gcd(*a, *b))),
+                _ => Err("expected 2 numbers".to_string()),
             }
         });
         add_fn!("lcm", |args| {
-            if args.len() != 2 {
-                panic!("lcm expects 2 arguments, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(a) => match args[1] {
-                    Value::Number(b) => Value::Number(a * b / gcd(a, b)),
-                    _ => panic!("lcm expects 2 integers"),
-                },
-                _ => panic!("lcm expects 2 integers"),
+            match (args.get(0), args.get(1)) {
+                (Some(Value::Number(a)), Some(Value::Number(b))) => {
+                    Ok(Value::Number(a * b / gcd(*a, *b)))
+                }
+                _ => Err("expected 2 numbers".to_string()),
             }
         });
         add_fn!("min", |args| {
-            if args.len() != 2 {
-                panic!("min expects 2 arguments, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(a) => match args[1] {
-                    Value::Number(b) => Value::Number(a.min(b)),
-                    _ => panic!("min expects 2 numbers"),
-                },
-                _ => panic!("min expects 2 numbers"),
+            match (args.get(0), args.get(1)) {
+                (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(a.min(*b))),
+                _ => Err("expected 2 numbers".to_string()),
             }
         });
         add_fn!("max", |args| {
-            if args.len() != 2 {
-                panic!("max expects 2 arguments, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(a) => match args[1] {
-                    Value::Number(b) => Value::Number(a.max(b)),
-                    _ => panic!("max expects 2 numbers"),
-                },
-                _ => panic!("max expects 2 numbers"),
+            match (args.get(0), args.get(1)) {
+                (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(a.max(*b))),
+                _ => Err("expected 2 numbers".to_string()),
             }
         });
         add_fn!("clamp", |args| {
-            if args.len() != 3 {
-                panic!("clamp expects 3 arguments, got {}", args.len());
-            }
-            match args[0] {
-                Value::Number(a) => match args[1] {
-                    Value::Number(b) => match args[2] {
-                        Value::Number(c) => Value::Number(a.max(b).min(c)),
-                        _ => panic!("clamp expects 3 numbers"),
-                    },
-                    _ => panic!("clamp expects 3 numbers"),
-                },
-                _ => panic!("clamp expects 3 numbers"),
+            match (args.get(0), args.get(1), args.get(2)) {
+                (Some(Value::Number(a)), Some(Value::Number(b)), Some(Value::Number(c))) => {
+                    Ok(Value::Number(a.max(*b).min(*c)))
+                }
+                _ => Err("expected 2 numbers".to_string()),
             }
         });
     }
