@@ -139,6 +139,38 @@ impl Parser {
 
     fn term(&mut self) -> ParseResult {
         let start = self.token.range.start;
+
+        if matches!(self.token.ty, Number(_))
+            && !matches!(
+                self.peek(),
+                Number(_)
+                    | Plus
+                    | Minus
+                    | Star
+                    | Dot
+                    | Cross
+                    | Slash
+                    | Divide
+                    | Percent
+                    | Carrot
+                    | RightParen
+                    | LeftBrace
+                    | RightBrace
+                    | Pipe
+                    | RightFloor
+                    | RightCeil
+                    | Newline
+                    | EOF
+            )
+        {
+            let left = self.atom()?;
+            let right = self.term()?;
+            return self.node(
+                NodeType::Binary(Box::new(left), BinaryOp::Mul, Box::new(right)),
+                start,
+            );
+        }
+
         let left = self.factor()?;
 
         match self.token.ty {

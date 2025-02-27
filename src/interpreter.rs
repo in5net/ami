@@ -1,4 +1,4 @@
-use std::{fmt::Binary, ops::Range};
+use std::ops::Range;
 
 use crate::{AmiError, BinaryOp, Node, NodeType, Scope, UnaryOp, Value};
 
