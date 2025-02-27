@@ -8,6 +8,9 @@ pub struct Lexer {
     current_char: char,
 }
 
+const SUPERSCRIPT: &str = "ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿˢᵀᵁⱽᵂˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾";
+const NORMALSCRIPT: &str = "abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ0123456789+-=()";
+
 type LexResult = Result<Token, AmiError>;
 
 impl Lexer {
@@ -53,6 +56,7 @@ impl Lexer {
         match self.current_char {
             '0'..='9' => self.number(),
             'a'..='z' | 'A'..='Z' | '_' | 'Α'..='ω' | '∞' => self.word(),
+            ch if SUPERSCRIPT.contains(ch) => self.superscript(),
             '=' => {
                 self.advance();
                 Ok(Token {
@@ -283,6 +287,30 @@ impl Lexer {
                 "mod" => Mod,
                 _ => Identifier(word.into()),
             },
+            range: start..self.index,
+        })
+    }
+
+    fn superscript(&mut self) -> LexResult {
+        let start = self.index;
+        let mut source = String::new();
+
+        while self.current_char != '\0' {
+            match SUPERSCRIPT.chars().position(|ch| ch == self.current_char) {
+                Some(index) => {
+                    let normal_char = NORMALSCRIPT.chars().nth(index).unwrap();
+                    source.push(normal_char);
+                    self.advance();
+                }
+                None => break,
+            };
+        }
+
+        let mut lexer = Lexer::new(source);
+        let mut tokens = lexer.lex()?;
+        tokens.pop();
+        Ok(Token {
+            ty: Superscript(tokens),
             range: start..self.index,
         })
     }

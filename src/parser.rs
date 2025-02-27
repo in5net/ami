@@ -144,6 +144,7 @@ impl Parser {
             && !matches!(
                 self.peek(),
                 Number(_)
+                    | Superscript(_)
                     | Plus
                     | Minus
                     | Star
@@ -264,7 +265,7 @@ impl Parser {
         let start = self.token.range.start;
         let result = self.call()?;
 
-        match self.token.ty {
+        match self.token.ty.clone() {
             Exclamation => {
                 self.advance();
                 self.node(NodeType::Unary(UnaryOp::Fact, Box::new(result)), start)
@@ -272,6 +273,17 @@ impl Parser {
             Degree => {
                 self.advance();
                 self.node(NodeType::Unary(UnaryOp::Degree, Box::new(result)), start)
+            }
+            Superscript(tokens) => {
+                self.advance();
+                self.node(
+                    NodeType::Binary(
+                        Box::new(result),
+                        BinaryOp::Pow,
+                        Box::new(Parser::new(tokens).arith_expr()?),
+                    ),
+                    start,
+                )
             }
             _ => Ok(result),
         }

@@ -4,6 +4,7 @@ use std::{fmt, ops::Range, rc::Rc};
 pub enum TokenType {
     Number(Rc<str>),
     Identifier(Rc<str>),
+    Superscript(Vec<Token>),
     Eq,
     Plus,
     Minus,
@@ -39,6 +40,15 @@ impl fmt::Display for TokenType {
         match self {
             Self::Number(value) => write!(f, "{}", value),
             Self::Identifier(name) => write!(f, "{}", name),
+            Self::Superscript(tokens) => write!(
+                f,
+                "^({})",
+                tokens
+                    .iter()
+                    .map(|t| t.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
             Self::Eq => write!(f, "'='"),
             Self::Plus => write!(f, "'+'"),
             Self::Minus => write!(f, "'-'"),
