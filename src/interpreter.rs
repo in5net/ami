@@ -2,11 +2,11 @@ use std::ops::Range;
 
 use crate::{AmiError, BinaryOp, Node, NodeType, Scope, UnaryOp, Value};
 
-pub struct Interpreter {
-    pub scope: Scope,
+pub struct Interpreter<'a> {
+    pub scope: Scope<'a>,
 }
 
-impl Default for Interpreter {
+impl Default for Interpreter<'_> {
     fn default() -> Self {
         let mut interpreter = Self {
             scope: Scope::default(),
@@ -18,7 +18,7 @@ impl Default for Interpreter {
 
 type RuntimeError = Result<Value, AmiError>;
 
-impl Interpreter {
+impl Interpreter<'_> {
     fn error<T>(&self, msg: String, reason: String, range: Range<usize>) -> Result<T, AmiError> {
         Err(AmiError { msg, reason, range })
     }
@@ -458,6 +458,7 @@ impl Interpreter {
                         body,
                     } => {
                         let mut interpreter = Interpreter::default();
+                        interpreter.scope.parent = Some(&self.scope);
                         for (name, value) in arg_names.iter().zip(arg_values) {
                             interpreter.scope.set(name.clone(), value.clone());
                         }
