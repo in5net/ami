@@ -303,7 +303,7 @@ impl Interpreter {
             for arg in args {
                 match arg {
                     Value::Number(x) => {
-                        if *x < min {
+                        if *x > min {
                             min = *x;
                         }
                     }
