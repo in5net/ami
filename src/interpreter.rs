@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::{fmt::Binary, ops::Range};
 
 use crate::{AmiError, BinaryOp, Node, NodeType, Scope, UnaryOp, Value};
 
@@ -50,22 +50,89 @@ impl Interpreter {
                     UnaryOp::Pos => Ok(value),
                     UnaryOp::Neg => match value {
                         Value::Number(x) => Ok(Value::Number(-x)),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(
+                                    body,
+                                    BinaryOp::Mul,
+                                    Box::new(Node {
+                                        ty: NodeType::Number("-1.0".into()),
+                                        range: 0..0,
+                                    }),
+                                ),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Sqrt => match value {
                         Value::Number(x) => Ok(Value::Number(x.sqrt())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Sqrt, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Cbrt => match value {
                         Value::Number(x) => Ok(Value::Number(x.cbrt())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Cbrt, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Fort => match value {
                         Value::Number(x) => Ok(Value::Number(x.powf(0.25))),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Fort, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Degree => match value {
                         Value::Number(x) => Ok(Value::Number(x.to_radians())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Degree, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Fact => match value {
@@ -76,59 +143,303 @@ impl Interpreter {
                             }
                             product
                         })),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Fact, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Abs => match value {
                         Value::Number(x) => Ok(Value::Number(x.abs())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Abs, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Floor => match value {
                         Value::Number(x) => Ok(Value::Number(x.floor())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Floor, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Ceil => match value {
                         Value::Number(x) => Ok(Value::Number(x.ceil())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Ceil, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     UnaryOp::Round => match value {
                         Value::Number(x) => Ok(Value::Number(x.round())),
+                        Value::Function {
+                            name,
+                            arg_names,
+                            body,
+                        } => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Unary(UnaryOp::Round, body),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                 }
             }
             NodeType::Binary(left, op, right) => {
-                let l_value = self.visit(*left)?;
-                let r_value = self.visit(*right)?;
+                let l_value = self.visit(*left.clone())?;
+                let r_value = self.visit(*right.clone())?;
 
                 match op {
                     BinaryOp::Add => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Add, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Add, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     BinaryOp::Sub => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a - b)),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Sub, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Sub, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     BinaryOp::Mul => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Mul, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Mul, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     BinaryOp::Div => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a / b)),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Div, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Div, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     BinaryOp::Mod => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a % b)),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Mod, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Mod, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                     BinaryOp::Pow => match (l_value, r_value) {
                         (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a.powf(b))),
+                        (
+                            _,
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(left, BinaryOp::Pow, body),
+                                range: 0..0,
+                            }),
+                        }),
+                        (
+                            Value::Function {
+                                name,
+                                arg_names,
+                                body,
+                            },
+                            _,
+                        ) => Ok(Value::Function {
+                            name,
+                            arg_names,
+                            body: Box::new(Node {
+                                ty: NodeType::Binary(body, BinaryOp::Pow, right),
+                                range: 0..0,
+                            }),
+                        }),
                         _ => unimplemented!(),
                     },
                 }
             }
             NodeType::FnDef(name, arg_names, node) => {
-                let function = Value::Function(name.clone(), arg_names, node);
+                let function = Value::Function {
+                    name: name.clone(),
+                    arg_names,
+                    body: node,
+                };
                 self.scope.set(name, function.clone());
                 Ok(function)
             }
@@ -141,7 +452,11 @@ impl Interpreter {
 
                 let function = self.scope.get(&name);
                 match function {
-                    Value::Function(_, arg_names, body) => {
+                    Value::Function {
+                        name: _,
+                        arg_names,
+                        body,
+                    } => {
                         let mut interpreter = Interpreter::default();
                         for (name, value) in arg_names.iter().zip(arg_values) {
                             interpreter.scope.set(name.clone(), value.clone());
