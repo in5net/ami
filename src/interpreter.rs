@@ -560,6 +560,7 @@ impl Interpreter<'_> {
                 _ => Err("expected a number".to_string()),
             }
         });
+
         add_fn!("sin", |args| {
             match args.get(0) {
                 Some(Value::Number(value)) => Ok(Value::Number(value.sin())),
@@ -578,6 +579,61 @@ impl Interpreter<'_> {
                 _ => Err("expected a number".to_string()),
             }
         });
+        add_fn!("asin", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.asin())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("acos", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.acos())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("atan", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.atan())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("sinh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.sinh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("cosh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.cosh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("tanh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.tanh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("asinh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.asinh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("acosh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.acosh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+        add_fn!("atanh", |args| {
+            match args.get(0) {
+                Some(Value::Number(value)) => Ok(Value::Number(value.atanh())),
+                _ => Err("expected a number".to_string()),
+            }
+        });
+
         add_fn!("gcd", |args| {
             match (args.get(0), args.get(1)) {
                 (Some(Value::Number(a)), Some(Value::Number(b))) => Ok(Value::Number(gcd(*a, *b))),
